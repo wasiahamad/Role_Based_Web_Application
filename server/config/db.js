@@ -1,8 +1,8 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 dotenv.config();
 
-
+// Check if MONGO_URI is defined
 if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI is not defined in .env file');
 }
