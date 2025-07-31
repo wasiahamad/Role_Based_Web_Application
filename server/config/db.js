@@ -6,6 +6,7 @@ dotenv.config();
 if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI is not defined in .env file');
 }
+// Connect to MongoDB
 
 const connectDB = async () => {
     try {
