@@ -125,6 +125,70 @@ export const registerUser = async (req, res) => {
     }
 };
 
+// user login controller
+export const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // validate input
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "All fields are required",
+                error: true,
+                success: false,
+            });
+        }
+
+        // Check if user exists
+        const user = await UserModel.findOne({ email: email});
+
+        if (!user) {
+            return res.status(400).json({
+                message: "User does not exist",
+                error: true,
+                success: false,
+            });
+        }
+
+        // Check password
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({
+                message: "Invalid credentials",
+                error: true,
+                success: false,
+            });
+        }
+
+        // create token for user
+        const token = jwt.sign(
+            { email: user.email, id: user._id },
+            process.env.JWT_SECRET,
+            {}
+        );
+
+        if (!token) {
+            return res.status(500).json({
+                message: "Error generating token",
+                error: true,
+                success: false,
+            });
+        }
+
+        res.status(200).json({
+            message: "User logged in successfully",
+            error: false,
+            success: true,
+            token: token,
+            data: user,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
 
 
 
