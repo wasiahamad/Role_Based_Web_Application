@@ -2,6 +2,7 @@ import UserModel from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+// import User from "../models/user.model.js";
 dotenv.config();
 
 
@@ -369,7 +370,20 @@ export const adminCreateNewUser = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
- 
+
+
+// export const getCurrentUser = async (req, res) => {
+//     try {
+//         const user = await UserModel.findById(req.user.userId).select('-password');
+//         res.status(200).json({
+//             success: true,
+//             data: user
+//         });
+//     } catch (err) {
+//         res.status(500).json({ success: false, message: "Internal server error" });
+//     }
+// };
+
 
 
 

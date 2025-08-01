@@ -1,21 +1,76 @@
 import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import AuthContext from '../../context/AuthContext';
-import { showError, showSuccess } from '../Toast';
+import { postData } from '../../utils/api';
+import { MyContext } from '../../App';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const context = useContext(MyContext);
 
-  const handleSubmit = async (e) => {
+  // from backend data state
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    role: "student", // default role
+  });
+
+  // function to handle input change
+  const onChangeInput = (e) => {
+    const { name, value } = e.target;
+    setFormData(() => {
+      return {
+        ...formData,
+        [name]: value,
+      };
+    });
+  };
+
+  // function to handle form submission
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      showSuccess('Login successful');
-    } catch {
-      showError('Invalid credentials');
+    // API call
+    if (formData.role === "student") {
+       const response = postData("/api/v1/user/login", formData);
+       response.then((res) => {
+         if (res.status === 200) {
+           console.log("response", res);
+           if (res?.error !== true) {
+             context.alertBox("success", res?.message);
+             localStorage.setItem("userEmail", formData.email);
+             localStorage.setItem("userRole", res?.data?.role);
+             localStorage.setItem("token", res?.token);
+             localStorage.setItem("user", res?.data?.name);
+             setFormData({
+               email: "",
+               password: "",
+               role: "student", // reset role
+             });
+             navigate("/");
+           } else {
+             context.alertBox("error", res?.message);
+           }
+         }
+       })
+    } else {
+      postData("/api/v1/user/login", formData)
+        .then((res) => {
+          console.log("response", res);
+          if (res?.error !== true) {
+            context.alertBox("success", res?.message);
+            localStorage.setItem("userEmail", formData.email);
+            localStorage.setItem("userRole", res?.data?.role);
+            localStorage.setItem("token", res?.token);
+            localStorage.setItem("user", res?.data?.name);
+            setFormData({
+              email: "",
+              password: "",
+              role: "", // reset role
+            });
+            navigate("/admin");
+          } else {
+            context.alertBox("error", res?.message);
+          }
+        });
     }
   };
 
@@ -28,8 +83,9 @@ const Login = () => {
           className="w-full border p-2 rounded"
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={onChangeInput}
           required
         />
 
@@ -37,10 +93,16 @@ const Login = () => {
           className="w-full border p-2 rounded"
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={onChangeInput}
           required
         />
+
+        <select className="w-full border p-2 mb-3 rounded" value={formData.role} name="role" onChange={onChangeInput}>
+          <option value="student" >Student</option>
+          <option value="admin">Admin</option>
+        </select>
 
         <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600" type="submit">
           Login

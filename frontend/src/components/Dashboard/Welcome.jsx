@@ -1,12 +1,13 @@
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthContext from '../../context/AuthContext';
 import { FaUserShield, FaUserGraduate } from 'react-icons/fa';
+import { MyContext } from '../../App';
 
 const Welcome = () => {
-  const { user } = useContext(AuthContext);
+  const userEmail = localStorage.getItem("userEmail");
   const navigate = useNavigate();
-  const isAdmin = user?.role === 'admin';
+
+  const { user, isAdmin } = useContext(MyContext);
 
   const handleRedirect = () => {
     if (isAdmin) {
@@ -30,7 +31,7 @@ const Welcome = () => {
           Welcome, {user?.username}!
         </h1>
         <p className="text-lg text-gray-600">
-          You are logged in as{' '}
+          You are logged in as {userEmail || 'Guest'}.
           <span className={`font-semibold ${isAdmin ? 'text-blue-600' : 'text-green-600'}`}>
             {user?.role}
           </span>
